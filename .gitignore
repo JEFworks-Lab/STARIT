@@ -1,0 +1,17 @@
+# Python
+# -------------------------
+__pycache__/
+.pytest_cache/
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# wheel metadata
+*.whl
+*.tar.gz
+
+# OS / Finder files
+.DS_Store

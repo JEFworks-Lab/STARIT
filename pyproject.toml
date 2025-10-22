@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "starit"
+version = "0.1.0"
+description = "STARIT: Spatial Transcriptomics As Rasterized Image Tensors"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [
+  { name = "JEFworks Lab"}
+]
+maintainers = [
+  { name = "Dee Velazquez", email = "dvelazq@jhu.edu" }
+]
+keywords = ["spatial-transcriptomics", "bioinformatics", "rasterization", "imaging"]
+classifiers=[
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Science/Research',
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',       
+        'Programming Language :: Python :: 3.11',
+        'Operating System :: MacOS'
+    ]
+dependencies = ["numpy>=1.26", "matplotlib>=3.8"]
+
+[project.urls]
+Homepage = "https://github.com/JEFworks-Lab/STARIT"
+Issues = "https://github.com/JEFworks-Lab/STARIT/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = { find = { where = ["src"] } }
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]

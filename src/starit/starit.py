@@ -28,17 +28,19 @@ def normalize(arr, t_min=0, t_max=1):
     
     return norm_arr
 
-def STARIT(x_cell_seg, y_cell_seg, x, y, g=np.ones(1), dx=1.0, blur=1.0, expand=1.1, draw=10000, wavelet_magnitude=False,use_windowing=True):
+def starit(x_bounding, y_bounding, x, y, g=np.ones(1), dx=1.0, blur=1.0, expand=1.1, draw=10000, wavelet_magnitude=False, use_windowing=True):
     ''' Rasterize a spatial transcriptomics dataset into a density image
     
     Paramters
     ---------
-    x_cell_seg:
-    y_cell_seg:
+    x_bounding: numpy array of length N
+        x location of all molecule points in cell to serve as segmentation bounds for bounding box
+    y_bounding: numpy array of length N
+        y location of all molecule points in cell to serve as segmentation bounds for bounding box
     x : numpy array of length N
-        x location of cells
+        x location of molecule points to be rasrterized
     y : numpy array of length N
-        y location of cells
+        y location of molecule points to be rasrterized
     g : numpy array of length N
         RNA count of cells
         If not given, density image is created
@@ -48,7 +50,7 @@ def STARIT(x_cell_seg, y_cell_seg, x, y, g=np.ones(1), dx=1.0, blur=1.0, expand=
         Standard deviation of Gaussian interpolation kernel.  Units are in 
         number of pixels.  Can be aUse a list to do multi scale.
     expand : float
-        Factor to expand sampled area beyond cells. Defaults to 1.1.
+        Factor to expand sampled area beyond molecules. Defaults to 1.1.
     draw : int
         If True, draw a figure every draw points return its handle. Defaults to False (0).
     wavelet_magnitude : bool
@@ -89,10 +91,10 @@ def STARIT(x_cell_seg, y_cell_seg, x, y, g=np.ones(1), dx=1.0, blur=1.0, expand=
     if wavelet_magnitude and np.any(blur != np.sort(blur)[::-1]):
         raise Exception('When using wavelet magnitude, blurs must be sorted from greatest to least')
     
-    minx = np.min(x_cell_seg)
-    maxx = np.max(x_cell_seg)
-    miny = np.min(y_cell_seg)
-    maxy = np.max(y_cell_seg)
+    minx = np.min(x_bounding)
+    maxx = np.max(x_bounding)
+    miny = np.min(y_bounding)
+    maxy = np.max(y_bounding)
     minx,maxx = (minx+maxx)/2.0 - (maxx-minx)/2.0*expand, (minx+maxx)/2.0 + (maxx-minx)/2.0*expand
     miny,maxy = (miny+maxy)/2.0 - (maxy-miny)/2.0*expand, (miny+maxy)/2.0 + (maxy-miny)/2.0*expand
     X_ = np.arange(minx,maxx,dx)
@@ -188,13 +190,63 @@ def STARIT(x_cell_seg, y_cell_seg, x, y, g=np.ones(1), dx=1.0, blur=1.0, expand=
     return output
 
 
-def STARIT_cell(x_sc_cell_pos, y_sc_cell_pos, x_cell_pos, y_cell_pos, dx=1, blur=1):
-    """Rasterize the full molecular data of a cell maintaining aspect ratio."""
-    _, _, _, cell_img = STARIT(x_sc_cell_pos, y_sc_cell_pos, x_cell_pos, y_cell_pos, dx=dx, blur=blur)
+def starit_cell(x_all_cell_seg, y_all_cell_seg, x_cell_seg, y_cell_seg, dx=1, blur=1, expand=1.1):
+    """Rasterize the full molecular data/cell segmentation of a cell and returns morphological rasterized image figure
+    
+    Paramters
+    ---------
+    x_all_cell_seg: numpy array of length N
+        x location of cell segmentation molecular coordinate points for all cells to serve as segmentation bounds for bounding box
+    y_all_cell_seg: numpy array of length N
+         y location of cell segmentation molecular coordinate points for all cells to serve as segmentation bounds for bounding box
+    x_cell_seg : numpy array of length N
+        x location of cell segmentation coordinate points of one cell/cell of interest to be rasrterized
+    y_cell_seg: numpy array of length N
+        y location of cell segmentation coordinate points of one cell/cell of interest to be rasrterized
+    dx : float
+        Pixel size to rasterize data (default 30.0, in same units as x and y)
+    blur : float or list of floats
+        Standard deviation of Gaussian interpolation kernel.  Units are in 
+        number of pixels.  Can be aUse a list to do multi scale.
+    expand : float
+        Factor to expand sampled area beyond molecules. Defaults to 1.1.
+    
+    Returns
+    -------
+    cell_img : matplotlib figure handle
+        Returns a figure handle to the drawn figure.
+        
+    """
+    _, _, _, cell_img = starit(x_all_cell_seg, y_all_cell_seg, x_cell_seg, y_cell_seg, dx=dx, blur=blur, expand=expand)
     return cell_img
 
 
-def STARIT_gene(x_cell_pos, y_cell_pos, x_gene_pos, y_gene_pos, dx=1, blur=1):
-    """Rasterize gene-specific molecular positions."""
-    _, _, _, gene_img = STARIT(x_cell_pos, y_cell_pos, x_gene_pos, y_gene_pos, dx=dx, blur=blur)
+def starit_gene(x_cell_seg_pos, y_cell_seg_pos, x_gene_pos, y_gene_pos, dx=1, blur=1, expand=1.1):
+    """Rasterize gene-specific molecular positions of a cell and returns gene rasterized image figure
+    
+    Paramters
+    ---------
+    x_cell_seg_pos: numpy array of length N
+        x location of cell segmentation molecular coordinate points of cell to serve as segmentation bounds for bounding box
+    y_cell_seg_pos: numpy array of length N
+         y location of cell segmentation molecular coordinate points of cell to serve as segmentation bounds for bounding box
+    x_gene_pos : numpy array of length N
+        x location of coordinate points of gene of interest to be rasrterized
+    y_gene_pos: numpy array of length N
+        y location of coordinate points of gene of interest to be rasrterized
+    dx : float
+        Pixel size to rasterize data (default 30.0, in same units as x and y)
+    blur : float or list of floats
+        Standard deviation of Gaussian interpolation kernel.  Units are in 
+        number of pixels.  Can be aUse a list to do multi scale.
+    expand : float
+        Factor to expand sampled area beyond molecules. Defaults to 1.1.
+    
+    Returns
+    -------
+    gene_img : matplotlib figure handle
+        Returns a figure handle to the drawn figure.
+        
+    """
+    _, _, _, gene_img = starit(x_cell_seg_pos, y_cell_seg_pos, x_gene_pos, y_gene_pos, dx=dx, blur=blur, expand=expand)
     return gene_img
