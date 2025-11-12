@@ -57,7 +57,7 @@ def get_bounding_box(x, y, expand=1.1):
     min_y = np.min(y)
     max_y = np.max(y)
     min_x,max_x = (min_x+max_x)/2.0 - (max_x-min_x)/2.0*expand, (min_x+max_x)/2.0 + (max_x-min_x)/2.0*expand
-    min_y,max_x = (min_y+max_y)/2.0 - (max_y-min_y)/2.0*expand, (min_y+max_y)/2.0 + (max_y-min_y)/2.0*expand
+    min_y,max_y = (min_y+max_y)/2.0 - (max_y-min_y)/2.0*expand, (min_y+max_y)/2.0 + (max_y-min_y)/2.0*expand
     
     return min_x, max_x, min_y, max_y
 
