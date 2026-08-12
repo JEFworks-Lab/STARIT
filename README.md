@@ -7,7 +7,7 @@ website. Questions, suggestions, or problems should be submitted as
 ## Overview
 <p align="center">
 
-<img src="https://github.com/JEFworks-Lab/STARIT/blob/main/images/0STARIT_fig1.png?raw=true" height="600"/>
+<img src="https://github.com/JEFworks-Lab/STARIT/blob/main/images/1STARIT_fig1.png?raw=true" height="600"/>
 
 </p>
 

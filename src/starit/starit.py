@@ -1,32 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def normalize(arr, t_min=0, t_max=1):
-    """Linearly normalizes an array between two specifed values.
-    
-    Parameters
-    ----------
-    arr : numpy array
-        array to be normalized
-    t_min : int or float
-        Lower bound of normalization range
-    t_max : int or float
-        Upper bound of normalization range
-    
-    Returns
-    -------
-    norm_arr : numpy array
-        1D array with normalized arr values
-        
-    """
-    
-    diff = t_max - t_min
-    diff_arr = np.max(arr) - np.min(arr)
-    min_ = np.min(arr)
-        
-    norm_arr = ((arr - min_)/diff_arr * diff) + t_min
-    
-    return norm_arr
 
 def get_bounding_box(x, y, expand=1.1):
     ''' Get mininmum and maximum 2D coordinates in all gene molecule positions of your data to create standardized image tensor representations (maintain cell aspecft ratio)
@@ -61,8 +35,8 @@ def get_bounding_box(x, y, expand=1.1):
     
     return min_x, max_x, min_y, max_y
 
-def starit(bounding_box, x, y, g=np.ones(1), dx=1.0, blur=1.0, draw=10000, wavelet_magnitude=False, use_windowing=True):
-    ''' Rasterize a spatial transcriptomics dataset into a density image
+def starit(bounding_box, x, y, dx=1.0, blur=1.0, draw=10000, wavelet_magnitude=False, use_windowing=True):
+    ''' Rasterize a spatial transcriptomics dataset into a tensor image
     
     Paramters
     ---------
@@ -72,14 +46,11 @@ def starit(bounding_box, x, y, g=np.ones(1), dx=1.0, blur=1.0, draw=10000, wavel
         x location of molecule points to be rasterized
     y : numpy array of length N
         y location of molecule points to be rasterized
-    g : numpy array of length N
-        RNA count of cells
-        If not given, density image is created
     dx : float
-        Pixel size to rasterize data (default 30.0, in same units as x and y)
+        Pixel size to rasterize data (default 1.0, in same units as x and y)
     blur : float or list of floats
-        Standard deviation of Gaussian interpolation kernel.  Units are in 
-        number of pixels.  Can be aUse a list to do multi scale.
+        Standard deviation of Gaussian interpolation kernel (default 1.0).  Units are in 
+        number of pixels.  Can be a list to do multi scale.
     draw : int
         If True, draw a figure every draw points return its handle. Defaults to False (0).
     wavelet_magnitude : bool
@@ -93,8 +64,6 @@ def starit(bounding_box, x, y, g=np.ones(1), dx=1.0, blur=1.0, draw=10000, wavel
         Locations of pixels along the x axis
     Y  : numpy array
         Locations of pixels along the y axis
-    M : numpy array
-        A rasterized image with len(blur) channels along the first axis
     fig : matplotlib figure handle
         If draw=True, returns a figure handle to the drawn figure.
         
@@ -128,16 +97,14 @@ def starit(bounding_box, x, y, g=np.ones(1), dx=1.0, blur=1.0, draw=10000, wavel
     if draw: 
         fig, ax = plt.subplots()
     count = 0
-    
-    g = np.resize(g, x.size)
-    if not (g == 1.0).all():
-        g = normalize(g)
-    
+
+    g = np.ones_like(x, dtype=float)
+
     for x_, y_, g_ in zip(x, y, g):
         if not use_windowing:  # legacy version
             k = np.exp(- ((X[0][..., None] - x_)**2 + (X[1][..., None] - y_)**2) / (2.0*(dx*blur*2)**2))
             k /= np.sum(k, axis=(0, 1), keepdims=True)
-            k *= g_
+            k *= g_ # g = 1
             if wavelet_magnitude:
                 for i in reversed(range(nb)):
                     if i == 0:
@@ -173,6 +140,7 @@ def starit(bounding_box, x, y, g=np.ones(1), dx=1.0, blur=1.0, draw=10000, wavel
             if not count % draw or count == (x.shape[0]-1):
                 print(f'{count} of {x.shape[0]}')
                 ax.cla()
+                #Before plotting, each image is independently min–max normalized
                 toshow = W - np.min(W, axis=(0, 1), keepdims=True)
                 toshow = toshow / np.max(toshow, axis=(0, 1), keepdims=True)
                 
@@ -198,13 +166,12 @@ def starit(bounding_box, x, y, g=np.ones(1), dx=1.0, blur=1.0, draw=10000, wavel
     # rename
     X = X_
     Y = Y_
+    
     if draw:
-        output = X, Y, W, fig
+        output = X, Y, fig
     else:
-        output = X, Y, W
+        output = X, Y
     return output
-
-
 
 def starit_gene(bounding_box, x_gene_pos, y_gene_pos, dx=1, blur=1):
     """Rasterize gene-specific molecular positions of a cell and returns gene rasterized image figure
@@ -218,10 +185,10 @@ def starit_gene(bounding_box, x_gene_pos, y_gene_pos, dx=1, blur=1):
     y_gene_pos: numpy array of length N
         y location of coordinate points of gene of interest to be rasterized
     dx : float
-        Pixel size to rasterize data (default 30.0, in same units as x and y)
+        Pixel size to rasterize data (default 1.0, in same units as x and y)
     blur : float or list of floats
-        Standard deviation of Gaussian interpolation kernel.  Units are in 
-        number of pixels.  Can be aUse a list to do multi scale.
+        Standard deviation of Gaussian interpolation kernel (default 1.0).  Units are in 
+        number of pixels.  Can be a list to do multi scale.
     
     Returns
     -------
@@ -229,5 +196,5 @@ def starit_gene(bounding_box, x_gene_pos, y_gene_pos, dx=1, blur=1):
         Returns a figure handle to the drawn figure.
         
     """
-    _, _, _, gene_img = starit(bounding_box, x_gene_pos, y_gene_pos, dx=dx, blur=blur)
+    _, _, gene_img = starit(bounding_box, x_gene_pos, y_gene_pos, dx=dx, blur=blur)
     return gene_img
