@@ -86,12 +86,14 @@ from starit import starit
 
 ## Tutorials
 - [Running STARIT on Simulated Dataset](https://github.com/JEFworks-Lab/STARIT/blob/main/simulated_data_example.ipynb)
-- [Running STARIT on Simulated Dataset with Noise](https://github.com/JEFworks-Lab/STARIT/blob/main/simulated_data_example.ipynb)
+- [Running STARIT on Simulated Dataset with Noise](https://github.com/JEFworks-Lab/STARIT/blob/main/simulated_data_noise_example.ipynb)
+- [Choosing the Pixel Size (`dx`) and Blur (`blur`) Parameters](https://github.com/JEFworks-Lab/STARIT/blob/main/dx_blur_parameters_tutorial.ipynb)
+- [Interpreting STARIT Image Intensities](https://github.com/JEFworks-Lab/STARIT/blob/main/intensity_tutorial.ipynb)
 
 
 ## Citation
 
 Our paper describing `STARIT` is availible on **bioRxiv**:
 
-[Velazquez D. et al. (2025), "Spatial Transcriptomics As Rasterized Image Tensors (STARIT) characterizes cell states with subcellular molecular heterogeneity", *bioRxiv*](https://doi.org/10.64898/2025.12.18.695193)
+[Velazquez D. *et al.* (2026), "Spatial Transcriptomics As Rasterized Image Tensors (STARIT) characterizes cell states with subcellular molecular heterogeneity", *bioRxiv*](https://www.biorxiv.org/content/10.64898/2025.12.18.695193v2)
 
